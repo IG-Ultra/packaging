@@ -12,6 +12,7 @@ Architecture: all
 Depends: plymouth,
          plymouth-label,
          ${misc:Depends}
-Description: Cutefish boot splash theme
+Description: Cutefish boot splash and boot menu themes
  The Plymouth boot splash of Cutefish: the logo on a dark background with a
- password prompt, and a plain text theme for consoles without graphics.
+ password prompt, and a plain text theme for consoles without graphics. Also
+ the GRUB theme, which shows the boot menu entries on the same background.

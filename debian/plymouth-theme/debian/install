@@ -1,3 +1,4 @@
 cutefish-logo /usr/share/plymouth/themes/
 cutefish-text /usr/share/plymouth/themes/
+grub/cutefish /usr/share/grub/themes/
 debian/cutefish-plymouth-theme.cfg /etc/default/grub.d/
