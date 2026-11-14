@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+
+# The boot menu uses the theme the installed system gets, from the package in
+# the live system. Binary hooks run in the image's directory.
+mkdir -p boot/grub/themes
+cp -r ../chroot/usr/share/grub/themes/cutefish boot/grub/themes/
