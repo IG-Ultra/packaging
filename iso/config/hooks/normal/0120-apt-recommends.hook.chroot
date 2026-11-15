@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+# live-build keeps its build-time "no Recommends" setting in the image, and
+# installed systems would then skip recommended packages for good.
+rm -f /etc/apt/apt.conf.d/00recommends
