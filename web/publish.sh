@@ -22,6 +22,7 @@ done
 "$(dirname "$0")/index.sh" "${isos[@]}" > index.html
 s3 cp index.html "s3://$BUCKET/index.html"
 s3 cp index.html "s3://$BUCKET/debian/index.html"
+s3 cp "$(dirname "$0")/favicon.svg" "s3://$BUCKET/favicon.svg" --content-type image/svg+xml
 
 # The ISOs had a page and a LATEST of their own before the front page listed them.
 s3 rm "s3://$BUCKET/iso/nightly/index.html"
