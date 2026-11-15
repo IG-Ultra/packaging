@@ -98,6 +98,7 @@ qt6-svg-plugins
 qtwayland5
 librsvg2-common
 at-spi2-core
+appmenu-gtk3-module
 
 # Disks and devices
 ntfs-3g

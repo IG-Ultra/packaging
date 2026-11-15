@@ -40,7 +40,8 @@ Depends: cutefish-toolkit,
          cutefish-framework,
          ${misc:Depends},
          ${shlibs:Depends}
-Recommends: xwayland,
+Recommends: appmenu-gtk3-module,
+            xwayland,
             pipewire-bin
 Description: CutefishOS Wayland compositor and desktop shell
  The Cutefish desktop's display server: DRM/KMS output, input, window
