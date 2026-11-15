@@ -123,8 +123,17 @@ jobs:
           fi
           s3() { aws s3 --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" "$@"; }
 
+          # R2 now and then fails a large multipart upload (InvalidPart, or a
+          # first-byte timeout); the same upload goes through when repeated.
           for file in "$NAME.iso" "$NAME.iso.sha256" "$NAME.packages"; do
-            s3 cp "iso/$file" "s3://$BUCKET/iso/nightly/$file"
+            for attempt in 1 2 3; do
+              s3 cp "iso/$file" "s3://$BUCKET/iso/nightly/$file" && break
+              if (( attempt == 3 )); then
+                exit 1
+              fi
+              echo "Upload of $file failed; trying again."
+              sleep 30
+            done
           done
           echo "$NAME" > LATEST
           s3 cp LATEST "s3://$BUCKET/iso/nightly/LATEST-${{ matrix.arch }}"
