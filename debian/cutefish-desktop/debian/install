@@ -1,2 +1,4 @@
 debian/firefox/policies.json etc/firefox/policies
 debian/cutefish-nouveau-atomic.conf etc/modprobe.d
+debian/cutefish-reef.sources etc/apt/sources.list.d
+debian/cutefish-reef.asc usr/share/keyrings
