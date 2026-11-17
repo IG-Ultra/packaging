@@ -403,3 +403,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run iso.yml --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"
+
+      # A repository built on the packages published here rebuilds its own
+      # once they are out; it and the token that may start it are secrets.
+      - name: Start the build that follows
+        env:
+          GH_TOKEN: ${{ secrets.FOLLOW_UP_TOKEN }}
+          REPOSITORY: ${{ secrets.FOLLOW_UP_REPOSITORY }}
+        run: |
+          if [[ -z "$GH_TOKEN" || -z "$REPOSITORY" ]]; then
+            echo "No build follows this one; skipping."
+            exit 0
+          fi
+          gh workflow run package.yml --repo "$REPOSITORY" --ref main -f only-when-changed=true
