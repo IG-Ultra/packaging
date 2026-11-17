@@ -12,6 +12,7 @@
 #                                              # before the ones that need it
 #   debian/build.sh --snapshot                 # versioned after the commit,
 #                                              # e.g. 1.0~git20261020120000.1a2b3c4-1
+#                                              # (a native package: 1.0+git...)
 #   debian/build.sh --skip cutefish-webkit     # every package but this one
 set -Eeuo pipefail
 
@@ -148,6 +149,13 @@ for project in "${PROJECTS[@]}"; do
     version="$upstream-${version##*-}"
   fi
 
+  # A native package was first published at its plain version, so its
+  # snapshots sort after it and are named for the last commit to its packaging.
+  if [[ "$SNAPSHOT" == true && "$native" == true ]]; then
+    stamp="$(TZ=UTC0 git -C "$PACKAGING" log -1 --date=format-local:%Y%m%d%H%M%S --format=%cd -- "debian/$project")"
+    version="$upstream+git$stamp.$(git -C "$PACKAGING" log -1 --abbrev=7 --format=%h -- "debian/$project")"
+  fi
+
   echo
   echo "==> [$project] $source $version"
 
@@ -161,6 +169,11 @@ for project in "${PROJECTS[@]}"; do
     rm -rf "$tree"
     mkdir -p "$tree"
     cp -a "$packaging" "$tree/debian"
+    if [[ "$SNAPSHOT" == true ]]; then
+      (cd "$tree" && DEBEMAIL="$(dpkg-parsechangelog -S Maintainer)" \
+        dch --newversion "$version" --distribution UNRELEASED \
+          "Snapshot of commit $(git -C "$PACKAGING" log -1 --format=%H -- "debian/$project").")
+    fi
     (cd "$tree" && dpkg-buildpackage -us -uc)
     rm -rf "$tree"
     install_built
