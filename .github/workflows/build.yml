@@ -30,6 +30,7 @@ jobs:
     outputs:
       changed: ${{ steps.compare.outputs.changed }}
       commits: ${{ steps.compare.outputs.commits }}
+      build: ${{ steps.compare.outputs.build }}
 
     steps:
       - name: Checkout
@@ -55,6 +56,7 @@ jobs:
             echo "Nothing changed since the last publish." >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "build=$(date -u +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
           {
             echo "commits<<EOF"
             cat commits
@@ -112,10 +114,13 @@ jobs:
         run: cutefish-framework/scripts/fetch-pdfium.sh
 
       - name: Build
+        env:
+          BUILD: ${{ needs.changes.outputs.build }}
         run: |
           docker run --rm \
             -v "$PWD:/work" \
             -w /work \
+            -e BUILD \
             debian:trixie \
             bash -euo pipefail -c '
               apt-get update
@@ -128,7 +133,7 @@ jobs:
                 xz-utils
 
               git config --global --add safe.directory "*"
-              packaging/debian/build.sh --install --snapshot --skip cutefish-webkit
+              packaging/debian/build.sh --install --snapshot --build "$BUILD" --skip cutefish-webkit
             '
           sudo chown -R "$(id -u):$(id -g)" packaging/out
 
@@ -194,10 +199,13 @@ jobs:
 
       - name: Build
         if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          BUILD: ${{ needs.changes.outputs.build }}
         run: |
           docker run --rm \
             -v "$PWD:/work" \
             -w /work \
+            -e BUILD \
             debian:trixie \
             bash -euo pipefail -c '
               apt-get update
@@ -210,7 +218,7 @@ jobs:
                 xz-utils
 
               git config --global --add safe.directory "*"
-              packaging/debian/build.sh --install --snapshot cutefish-webkit
+              packaging/debian/build.sh --install --snapshot --build "$BUILD" cutefish-webkit
             '
           sudo chown -R "$(id -u):$(id -g)" packaging/out
           rm -f packaging/out/debian/*-dbgsym_*

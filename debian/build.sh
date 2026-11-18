@@ -13,6 +13,9 @@
 #   debian/build.sh --snapshot                 # versioned after the commit,
 #                                              # e.g. 1.0~git20261020120000.1a2b3c4-1
 #                                              # (a native package: 1.0+git...)
+#   debian/build.sh --snapshot --build 20261020130000
+#                                              # and marked as this build,
+#                                              # e.g. 1.0~git20261020120000.1a2b3c4-1+b20261020130000
 #   debian/build.sh --skip cutefish-webkit     # every package but this one
 set -Eeuo pipefail
 
@@ -22,16 +25,23 @@ OUT="$PACKAGING/out/debian"
 
 INSTALL=false
 SNAPSHOT=false
+BUILD=
 SKIP=()
 while [[ "${1:-}" == --* ]]; do
   case "$1" in
     --install) INSTALL=true ;;
     --snapshot) SNAPSHOT=true ;;
+    --build) BUILD="${2:?--build needs an id}"; shift ;;
     --skip) SKIP+=("${2:?--skip needs a project}"); shift ;;
     *) echo "Error: unknown option $1" >&2; exit 1 ;;
   esac
   shift
 done
+
+if [[ -n "$BUILD" && "$SNAPSHOT" == false ]]; then
+  echo "Error: --build needs --snapshot" >&2
+  exit 1
+fi
 
 SUDO=(sudo)
 if (( EUID == 0 )); then
@@ -154,6 +164,12 @@ for project in "${PROJECTS[@]}"; do
   if [[ "$SNAPSHOT" == true && "$native" == true ]]; then
     stamp="$(TZ=UTC0 git -C "$PACKAGING" log -1 --date=format-local:%Y%m%d%H%M%S --format=%cd -- "debian/$project")"
     version="$upstream+git$stamp.$(git -C "$PACKAGING" log -1 --abbrev=7 --format=%h -- "debian/$project")"
+  fi
+
+  # A rebuild of an unchanged commit differs from the published one, and
+  # PackageKit installs no update whose version is the one installed.
+  if [[ -n "$BUILD" ]]; then
+    version="$version+b$BUILD"
   fi
 
   echo
