@@ -2,8 +2,9 @@
 
 . /usr/lib/live/config.sh
 
-# Logs the live user in without a password. The file is written at boot, into
-# the live system's memory, so an installed copy of the system never has it.
+# Logs the live user in without a password, and again after Log Out. The file
+# is written at boot, into the live system's memory, so an installed copy of
+# the system never has it.
 
 Cmdline ()
 {
@@ -45,6 +46,7 @@ Config ()
 		cat > /etc/cutefish-dm.conf << EOF
 [Autologin]
 User=${LIVE_USERNAME}
+Relogin=true
 EOF
 	fi
 
