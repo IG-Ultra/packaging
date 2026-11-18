@@ -14,6 +14,7 @@ Homepage: https://github.com/cutefishos/video-player
 Package: cutefish-video-player
 Architecture: any
 Depends: cutefish-toolkit,
+         libmpv2,
          ${misc:Depends},
          ${shlibs:Depends}
 Description: CutefishOS Video Player
