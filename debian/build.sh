@@ -15,7 +15,7 @@
 #                                              # (a native package: 1.0+git...)
 #   debian/build.sh --snapshot --build 20261020130000
 #                                              # and marked as this build,
-#                                              # e.g. 1.0~git20261020120000.1a2b3c4-1+b20261020130000
+#                                              # e.g. 1.0~git20261020120000.1a2b3c4-1+ci20261020130000
 #   debian/build.sh --skip cutefish-webkit     # every package but this one
 set -Eeuo pipefail
 
@@ -167,9 +167,10 @@ for project in "${PROJECTS[@]}"; do
   fi
 
   # A rebuild of an unchanged commit differs from the published one, and
-  # PackageKit installs no update whose version is the one installed.
+  # PackageKit installs no update whose version is the one installed. A +b
+  # suffix would mark a binNMU, which dpkg-genchanges takes off the source.
   if [[ -n "$BUILD" ]]; then
-    version="$version+b$BUILD"
+    version="$version+ci$BUILD"
   fi
 
   echo
