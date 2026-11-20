@@ -5,7 +5,7 @@ Maintainer: Reion Wong <reionwong@gmail.com>
 Build-Depends: cmake,
                debhelper-compat (= 13),
                cutefish-toolkit,
-               libghostty-vt-dev,
+               cutefish-ghostty-vt-dev,
                libxkbcommon-dev,
                pkg-config
 Standards-Version: 4.7.2
