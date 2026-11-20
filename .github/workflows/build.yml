@@ -43,6 +43,8 @@ jobs:
           while read -r project _; do
             [[ -z "$project" || "$project" == \#* ]] && continue
             grep -qs native "debian/$project/debian/source/format" && continue
+            # Built from a pinned release, which the packaging commit names.
+            [[ -f "debian/$project/upstream" ]] && continue
             echo "$project $(git ls-remote "https://github.com/cutefishos/$project.git" HEAD | cut -f 1)" >> commits
           done < versions
           cat commits
@@ -127,10 +129,15 @@ jobs:
               apt-get install -y --no-install-recommends \
                 build-essential \
                 ca-certificates \
+                curl \
                 devscripts \
                 equivs \
                 git \
+                minisign \
                 xz-utils
+
+              # libghostty-vt builds with a pinned Zig, which Debian does not package.
+              export PATH="$(packaging/debian/libghostty-vt/fetch-zig.sh /opt):$PATH"
 
               git config --global --add safe.directory "*"
               packaging/debian/build.sh --install --snapshot --build "$BUILD" --skip cutefish-webkit

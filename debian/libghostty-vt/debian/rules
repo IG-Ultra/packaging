@@ -1,0 +1,28 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/architecture.mk
+
+ZIG ?= zig
+# A cache of its own, empty at the start: the build takes Zig packages only
+# from zigdeps/, the release's dependency tarball, and fetches nothing.
+ZIG_OPTIONS = --system $(CURDIR)/zigdeps -Doptimize=ReleaseFast -Dcpu=baseline
+export ZIG_GLOBAL_CACHE_DIR = $(CURDIR)/debian/zig-cache
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+
+override_dh_auto_build:
+
+# zig build compiles and installs in one step.
+override_dh_auto_install:
+	DESTDIR=$(CURDIR)/debian/tmp $(ZIG) build --prefix /usr --prefix-lib-dir lib/$(DEB_HOST_MULTIARCH) $(ZIG_OPTIONS)
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	$(ZIG) build test-lib-vt $(ZIG_OPTIONS)
+endif
+
+override_dh_auto_clean:
+	rm -rf .zig-cache zig-out debian/zig-cache

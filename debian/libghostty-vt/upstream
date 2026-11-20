@@ -1,0 +1,6 @@
+# The release tarball, the Zig packages it builds with, as a second tarball
+# unpacked into zigdeps/, and the minisign key libghostty-vt signs them with
+# (PACKAGING-LIBGHOSTTY.md in the tarball). debian/build.sh checks both.
+minisign-key RWQlAjJC23149WL2sEpT/l0QKy7hMIFhYdQOFy0Z7z7PbneUgvlsnYcV
+orig https://release.files.ghostty.org/libghostty-vt/1.0.1/libghostty-vt-1.0.1.tar.gz 333dfce97641ef9b536bb9e08907ad86abaaada50e8f7417b70d9284adef37aa
+zigdeps https://release.files.ghostty.org/libghostty-vt/1.0.1/libghostty-vt-1.0.1-deps.tar.gz 91a4e10960a52bf5bf4b15aa2a2cddaff8a89d6cd903d3055bda4fd17de3356d
