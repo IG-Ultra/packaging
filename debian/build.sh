@@ -4,7 +4,9 @@
 # Build-Depends and Depends in their control files. Each package is built from
 # its checkout's committed HEAD; the results go to out/debian/. A native
 # package, such as the cutefish-desktop metapackage, has no checkout and is
-# built from its packaging alone.
+# built from its packaging alone. A package with a debian/<project>/upstream
+# file, such as libghostty-vt, is built from the release tarballs it pins,
+# downloaded and checked against their SHA-256 and minisign signatures.
 #
 #   debian/build.sh                            # every package
 #   debian/build.sh cutefish-core settings     # just these
@@ -120,6 +122,42 @@ fi
 
 mkdir -p "$OUT"
 
+# Downloads the tarballs debian/$1/upstream pins as the .orig tarballs of
+# $2 $3, unless they are there already, and checks each one: its SHA-256 and
+# its minisign signature with the pinned key. The line named orig is the main
+# tarball, each other line a component of its name.
+fetch_upstream() {
+  local pins="$PACKAGING/debian/$1/upstream" source="$2" upstream="$3"
+  local key name url sha256 file
+  key="$(awk '$1 == "minisign-key" { print $2 }' "$pins")"
+  command -v minisign >/dev/null || { echo "Error: $1 needs minisign to check its tarballs" >&2; exit 1; }
+  while read -r name url sha256; do
+    [[ -z "$name" || "$name" == \#* || "$name" == minisign-key ]] && continue
+    file="$OUT/${source}_$upstream.orig.tar.gz"
+    [[ "$name" == orig ]] || file="$OUT/${source}_$upstream.orig-$name.tar.gz"
+    if ! echo "$sha256  $file" | sha256sum --check --quiet --status 2>/dev/null; then
+      curl -fsSL -o "$file" "$url"
+      echo "$sha256  $file" | sha256sum --check --quiet
+    fi
+    curl -fsSL -o "$file.minisig" "$url.minisig"
+    minisign -Vq -P "$key" -m "$file" -x "$file.minisig"
+    rm -f "$file.minisig"
+  done < "$pins"
+}
+
+# Unpacks the tarballs fetch_upstream left, the components into directories
+# of their names, as dpkg-source unpacks them.
+unpack_upstream() {
+  local project="$1" source="$2" upstream="$3" tree="$4" name
+  mkdir -p "$tree"
+  tar -xzf "$OUT/${source}_$upstream.orig.tar.gz" -C "$tree" --strip-components=1
+  while read -r name _; do
+    [[ -z "$name" || "$name" == \#* || "$name" == minisign-key || "$name" == orig ]] && continue
+    mkdir -p "$tree/$name"
+    tar -xzf "$OUT/${source}_$upstream.orig-$name.tar.gz" -C "$tree/$name" --strip-components=1
+  done < "$PACKAGING/debian/$project/upstream"
+}
+
 # Installs the binary packages just built for $source $version.
 install_built() {
   [[ "$INSTALL" == true ]] || return 0
@@ -139,8 +177,12 @@ for project in "${PROJECTS[@]}"; do
   if [[ "$(cat "$packaging/source/format" 2>/dev/null)" == "3.0 (native)" ]]; then
     native=true
   fi
+  released=false
+  if [[ -f "$PACKAGING/debian/$project/upstream" ]]; then
+    released=true
+  fi
 
-  if [[ "$native" == false ]] && ! git -C "$src" rev-parse --verify --quiet HEAD >/dev/null; then
+  if [[ "$native" == false && "$released" == false ]] && ! git -C "$src" rev-parse --verify --quiet HEAD >/dev/null; then
     echo "Error: $src is not a Git checkout with a commit" >&2
     exit 1
   fi
@@ -153,7 +195,8 @@ for project in "${PROJECTS[@]}"; do
     exit 1
   fi
 
-  if [[ "$SNAPSHOT" == true && "$native" == false ]]; then
+  # A released tarball has no commit to name a snapshot after.
+  if [[ "$SNAPSHOT" == true && "$native" == false && "$released" == false ]]; then
     stamp="$(TZ=UTC0 git -C "$src" log -1 --date=format-local:%Y%m%d%H%M%S --format=%cd HEAD)"
     upstream="$upstream~git$stamp.$(git -C "$src" rev-parse --short=7 HEAD)"
     version="$upstream-${version##*-}"
@@ -179,6 +222,23 @@ for project in "${PROJECTS[@]}"; do
   if [[ "$INSTALL" == true ]]; then
     (cd "$OUT" && "${SUDO[@]}" mk-build-deps -i -r \
       -t "apt-get --yes --no-install-recommends" "$packaging/control")
+  fi
+
+  if [[ "$released" == true ]]; then
+    tree="$OUT/$source-$upstream"
+    rm -rf "$tree"
+    fetch_upstream "$project" "$source" "$upstream"
+    unpack_upstream "$project" "$source" "$upstream" "$tree"
+    cp -a "$packaging" "$tree/debian"
+    if [[ -n "$BUILD" ]]; then
+      (cd "$tree" && DEBEMAIL="$(dpkg-parsechangelog -S Maintainer)" \
+        dch --newversion "$version" --distribution UNRELEASED "Rebuild $BUILD.")
+    fi
+    (cd "$tree" && dpkg-buildpackage -us -uc)
+    rm -rf "$tree"
+    install_built
+    echo "==> [$project] OK"
+    continue
   fi
 
   if [[ "$native" == true ]]; then
