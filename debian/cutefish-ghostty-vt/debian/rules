@@ -39,5 +39,10 @@ override_dh_auto_install:
 		debian/cutefish-ghostty-vt.pc.in > $(PACKAGE)/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/cutefish-ghostty-vt.pc
 	rm -rf debian/tmp
 
+# Zig names the archive's members by their cache paths, which strip cannot
+# write back; the programs that link the library are stripped instead.
+override_dh_strip:
+	dh_strip -Xlibghostty-vt.a
+
 override_dh_auto_clean:
 	rm -rf .zig-cache zig-out debian/zig-cache debian/tmp
