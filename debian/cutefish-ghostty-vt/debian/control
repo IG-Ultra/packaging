@@ -1,0 +1,24 @@
+Source: cutefish-ghostty-vt
+Section: libdevel
+Priority: optional
+Maintainer: Reion Wong <reionwong@gmail.com>
+# Zig 0.17 also builds it; Debian has no Zig, so it is not listed here and
+# debian/cutefish-ghostty-vt/fetch-zig.sh puts the pinned release on PATH.
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.2
+Homepage: https://github.com/ghostty-org/ghostty
+Rules-Requires-Root: no
+
+Package: cutefish-ghostty-vt-dev
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}
+Description: libghostty-vt as a static library for building cutefish-terminal
+ libghostty-vt parses terminal output and keeps a terminal's state: its
+ screens, scrollback, modes and colours, with render state, selection,
+ search and the encoding of keys, the mouse and pastes.
+ .
+ This package holds it only for building Cutefish: a static library and
+ headers in directories of their own and the pkg-config module
+ cutefish-ghostty-vt, none of which a distribution's libghostty-vt uses, so
+ both can be installed together. Nothing of it is needed at run time.

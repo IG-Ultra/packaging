@@ -3,7 +3,7 @@
 # SHA-256 and its minisign signature, and prints the directory to put on
 # PATH. Zig is not in Debian, so the package build cannot depend on it.
 #
-#   export PATH="$(debian/libghostty-vt/fetch-zig.sh /opt):$PATH"
+#   export PATH="$(debian/cutefish-ghostty-vt/fetch-zig.sh /opt):$PATH"
 set -Eeuo pipefail
 
 DIR="${1:?usage: fetch-zig.sh DIR}"

@@ -43,10 +43,13 @@ package is versioned after its checkout's commit, such as
 `1.0~git20261020120000.1a2b3c4-1`. The `~` puts snapshots before the release
 in `versions`, so it should name the next release, not the last one.
 
-libghostty-vt has no checkout: it is built from the release tarballs that
-`debian/libghostty-vt/upstream` pins by SHA-256, its signatures checked with
-minisign. Its build needs `curl`, `minisign` and Zig 0.17 on `PATH`;
-`debian/libghostty-vt/fetch-zig.sh` downloads the pinned Zig and checks it.
+cutefish-ghostty-vt, libghostty-vt as a static library that only
+cutefish-terminal's build uses, has no checkout: it is built from the release
+tarballs that `debian/cutefish-ghostty-vt/upstream` pins by SHA-256, their
+signatures checked with minisign. Its names and paths are its own, so a
+distribution's libghostty-vt can be installed beside it. The build needs
+`curl`, `minisign` and Zig 0.17 on `PATH`; `debian/cutefish-ghostty-vt/fetch-zig.sh`
+downloads the pinned Zig and checks it.
 
 `debian/publish.sh trixie-nightly repo/` lays those packages out as the
 `trixie-nightly` suite of an APT repository under `repo/`; `--sign` signs it

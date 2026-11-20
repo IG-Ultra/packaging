@@ -1,5 +1,0 @@
-usr/include
-usr/lib/*/cmake
-usr/lib/*/libghostty-vt.a
-usr/lib/*/libghostty-vt.so
-usr/lib/*/pkgconfig

@@ -1,0 +1,10 @@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
+
+Name: cutefish-ghostty-vt
+Description: libghostty-vt, static, for building Cutefish
+URL: https://github.com/ghostty-org/ghostty
+Version: @VERSION@
+Cflags: -I${includedir} -DGHOSTTY_STATIC
+# The directory holds only the static library, which -l then finds.
+Libs: -L${libdir} -lghostty-vt -lm

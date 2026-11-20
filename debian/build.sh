@@ -5,7 +5,7 @@
 # its checkout's committed HEAD; the results go to out/debian/. A native
 # package, such as the cutefish-desktop metapackage, has no checkout and is
 # built from its packaging alone. A package with a debian/<project>/upstream
-# file, such as libghostty-vt, is built from the release tarballs it pins,
+# file, such as cutefish-ghostty-vt, is built from the release tarballs it pins,
 # downloaded and checked against their SHA-256 and minisign signatures.
 #
 #   debian/build.sh                            # every package

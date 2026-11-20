@@ -1,0 +1,43 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpkg/architecture.mk
+
+ZIG ?= zig
+# A cache of its own, empty at the start: the build takes Zig packages only
+# from zigdeps/, the release's dependency tarball, and fetches nothing.
+ZIG_OPTIONS = --system $(CURDIR)/zigdeps -Doptimize=ReleaseFast -Dcpu=baseline
+export ZIG_GLOBAL_CACHE_DIR = $(CURDIR)/debian/zig-cache
+
+# Paths no distribution's libghostty-vt uses, so the two never collide.
+LIBDIR = usr/lib/$(DEB_HOST_MULTIARCH)/cutefish-ghostty-vt
+INCLUDEDIR = usr/include/cutefish-ghostty-vt
+PACKAGE = $(CURDIR)/debian/cutefish-ghostty-vt-dev
+VERSION = $(shell dpkg-parsechangelog -S Version | sed 's/-[^-]*$$//')
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+
+override_dh_auto_build:
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	$(ZIG) build test-lib-vt $(ZIG_OPTIONS)
+endif
+
+# zig build compiles and installs in one step. Only the static library and
+# the headers are kept; the shared library and upstream's pkg-config and
+# CMake files, which carry the common names, are left out.
+override_dh_auto_install:
+	DESTDIR=$(CURDIR)/debian/tmp $(ZIG) build --prefix /usr --prefix-lib-dir $(LIBDIR:usr/%=%) \
+		--prefix-include-dir $(INCLUDEDIR:usr/%=%) $(ZIG_OPTIONS)
+	install -d $(PACKAGE)/$(LIBDIR) $(PACKAGE)/$(INCLUDEDIR) $(PACKAGE)/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig
+	install -m 644 debian/tmp/$(LIBDIR)/libghostty-vt.a $(PACKAGE)/$(LIBDIR)/
+	cp -a debian/tmp/$(INCLUDEDIR)/ghostty $(PACKAGE)/$(INCLUDEDIR)/
+	sed -e 's|@LIBDIR@|/$(LIBDIR)|' -e 's|@INCLUDEDIR@|/$(INCLUDEDIR)|' -e 's|@VERSION@|$(VERSION)|' \
+		debian/cutefish-ghostty-vt.pc.in > $(PACKAGE)/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/cutefish-ghostty-vt.pc
+	rm -rf debian/tmp
+
+override_dh_auto_clean:
+	rm -rf .zig-cache zig-out debian/zig-cache debian/tmp

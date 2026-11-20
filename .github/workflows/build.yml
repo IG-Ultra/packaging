@@ -136,8 +136,8 @@ jobs:
                 minisign \
                 xz-utils
 
-              # libghostty-vt builds with a pinned Zig, which Debian does not package.
-              export PATH="$(packaging/debian/libghostty-vt/fetch-zig.sh /opt):$PATH"
+              # cutefish-ghostty-vt builds with a pinned Zig, which Debian does not package.
+              export PATH="$(packaging/debian/cutefish-ghostty-vt/fetch-zig.sh /opt):$PATH"
 
               git config --global --add safe.directory "*"
               packaging/debian/build.sh --install --snapshot --build "$BUILD" --skip cutefish-webkit
