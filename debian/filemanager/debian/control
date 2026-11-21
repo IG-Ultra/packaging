@@ -25,6 +25,7 @@ Homepage: https://github.com/cutefishos/filemanager
 Package: cutefish-filemanager
 Architecture: any
 Depends: udisks2,
+         eject,
          fuse3,
          cutefish-toolkit,
          cutefish-framework,
