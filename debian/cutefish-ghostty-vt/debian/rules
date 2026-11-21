@@ -5,7 +5,8 @@ include /usr/share/dpkg/architecture.mk
 ZIG ?= zig
 # A cache of its own, empty at the start: the build takes Zig packages only
 # from zigdeps/, the release's dependency tarball, and fetches nothing.
-ZIG_OPTIONS = --system $(CURDIR)/zigdeps -Doptimize=ReleaseFast -Dcpu=baseline
+ZIG_TEST_OPTIONS = --system $(CURDIR)/zigdeps -Dcpu=baseline
+ZIG_OPTIONS = $(ZIG_TEST_OPTIONS) -Doptimize=ReleaseFast
 export ZIG_GLOBAL_CACHE_DIR = $(CURDIR)/debian/zig-cache
 
 # Paths no distribution's libghostty-vt uses, so the two never collide.
@@ -21,9 +22,11 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 
+# Some upstream tests assert at compile time that runtime safety checks are on,
+# as they are only in a debug build.
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	$(ZIG) build test-lib-vt $(ZIG_OPTIONS)
+	$(ZIG) build test-lib-vt $(ZIG_TEST_OPTIONS)
 endif
 
 # zig build compiles and installs in one step. Only the static library and
