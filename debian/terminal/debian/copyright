@@ -22,6 +22,15 @@ Comment: Holds the published palettes of Catppuccin (MIT), Dracula (MIT),
  Schoonover), Tokyo Night (Apache-2.0, Folke Lemaitre) and Tomorrow Night
  (MIT, 2011 Chris Kempson).
 
+Files: lib/links.cpp
+       tests/logic/links_test.cpp
+       shell-integration/fish/*
+Copyright: 2024 Mitchell Hashimoto, Ghostty contributors
+           2026 Reion Wong <reionwong@gmail.com>
+License: MIT
+Comment: The link pattern and its test cases, and the fish integration,
+ follow Ghostty's.
+
 License: MIT
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
