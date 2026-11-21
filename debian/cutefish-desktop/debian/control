@@ -27,6 +27,7 @@ Depends: cutefish-calculator,
          cutefish-toolkit,
          cutefish-video-player,
          cutefish-wallpapers,
+         sound-theme-freedesktop,
          xdg-desktop-portal-cutefish,
          ${misc:Depends}
 Recommends: cutefish-computer-use,
